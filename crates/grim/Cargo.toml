@@ -1,0 +1,16 @@
+[package]
+name = "grim"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "A grimoire for your machines: declarative, cross-platform environment management."
+
+[[bin]]
+name = "grim"
+path = "src/main.rs"
+
+[dependencies]
+grim-core = { path = "../grim-core" }

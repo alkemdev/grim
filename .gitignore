@@ -1,0 +1,14 @@
+# Rust
+/target/
+**/*.rs.bk
+*.pdb
+
+# grim local state / caches
+/.grim/
+*.log
+
+# OS / editor cruft
+.DS_Store
+*.swp
+.idea/
+.vscode/
