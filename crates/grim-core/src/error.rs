@@ -21,3 +21,23 @@ pub enum ResolveError {
     )]
     AmbiguousPrecedence { a: String, b: String, score: i64 },
 }
+
+/// Errors raised while loading a grimoire from disk.
+#[derive(Debug, Error)]
+pub enum LoadError {
+    /// The grimoire file could not be read.
+    #[error("reading grimoire `{path}`: {source}")]
+    Io {
+        path: String,
+        #[source]
+        source: std::io::Error,
+    },
+
+    /// The grimoire file could not be parsed as TOML.
+    #[error("parsing grimoire `{path}`: {source}")]
+    Parse {
+        path: String,
+        #[source]
+        source: toml::de::Error,
+    },
+}

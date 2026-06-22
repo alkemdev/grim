@@ -1,0 +1,31 @@
+# An example grimoire. Try it with:
+#
+#     grim stack --grimoire examples/grimoire.toml
+#
+# Precedence is inferred from which facts each platform constrains — no numbers to manage in the
+# common case. The bands, lowest to highest: os < arch < distro < hardware < host < container.
+
+[grimoire]
+name = "example"
+# extends = ["vendor/dotfiles"]   # grimoire composition (home <- work) lands in a later phase
+
+[platform.macos]
+match = { os = "macos" }
+
+[platform.linux]
+match = { os = "linux" }
+
+# Hardware band: outranks the OS layers.
+[platform.cuda]
+match = { gpu = { vendor = "nvidia" } }
+
+[platform.avx512]
+match = { cpu_features = { all = ["avx512f"] } }
+
+# Host band: a specific machine outranks hardware/OS layers.
+[platform.workstation]
+match = { hostname = "x1" }
+
+# Container band: a dev container tops the stack.
+[platform.devcontainer]
+match = { container = {} }
