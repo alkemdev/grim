@@ -305,10 +305,10 @@ pub fn classify_container(
 }
 
 fn detect_cpu_features() -> BTreeSet<String> {
-    if cfg!(target_os = "linux") {
-        if let Ok(text) = std::fs::read_to_string("/proc/cpuinfo") {
-            return parse_cpuinfo_flags(&text);
-        }
+    if cfg!(target_os = "linux")
+        && let Ok(text) = std::fs::read_to_string("/proc/cpuinfo")
+    {
+        return parse_cpuinfo_flags(&text);
     }
     #[cfg(target_os = "macos")]
     {

@@ -4,7 +4,7 @@
 //! the platforms that match and orders them by precedence (highest first). The result is a path down
 //! the platform lattice; resolving any layered value is then a fold along that path.
 
-use std::cmp::Ordering;
+use std::cmp::{Ordering, Reverse};
 use std::collections::{BTreeMap, HashMap, HashSet, VecDeque};
 
 use crate::error::ResolveError;
@@ -65,7 +65,7 @@ pub fn resolve_stack<'p>(
 
     let mut matching: Vec<&Platform> = platforms.iter().filter(|p| p.matches(facts)).collect();
     // Stable sort by score descending; equal-score groups are disambiguated next.
-    matching.sort_by(|a, b| b.score().cmp(&a.score()));
+    matching.sort_by_key(|p| Reverse(p.score()));
 
     let ordered = order_within_ties(matching, &closure)?;
     Ok(ActiveStack { platforms: ordered })
