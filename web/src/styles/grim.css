@@ -1,0 +1,17 @@
+/* grim brand accent — an arcane violet, fitting a grimoire. */
+:root {
+	--sl-color-accent-low: #241245;
+	--sl-color-accent: #7c5cff;
+	--sl-color-accent-high: #d2c7ff;
+}
+
+:root[data-theme='light'] {
+	--sl-color-accent-low: #e7ddff;
+	--sl-color-accent: #6536ff;
+	--sl-color-accent-high: #2a1666;
+}
+
+/* A touch more presence for the hero tagline on the splash page. */
+.hero h1 {
+	letter-spacing: -0.02em;
+}

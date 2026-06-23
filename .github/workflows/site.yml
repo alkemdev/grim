@@ -1,0 +1,39 @@
+name: site
+
+on:
+  push:
+    branches: [main]
+    paths: ['web/**', 'docs/**', '.github/workflows/site.yml']
+  pull_request:
+    paths: ['web/**', 'docs/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install
+        run: npm ci
+        working-directory: web
+      - name: Build (syncs docs/, then astro build)
+        run: npm run build
+        working-directory: web
+      # Deploys only once you opt in: set the repo variable DEPLOY_SITE=true and add the
+      # CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID secrets. Until then this job just validates
+      # that the site builds on every push.
+      - name: Deploy to Cloudflare Pages
+        if: ${{ vars.DEPLOY_SITE == 'true' }}
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy web/dist --project-name=grim --branch=main

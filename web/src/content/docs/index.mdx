@@ -1,0 +1,63 @@
+---
+title: grim
+description: A grimoire for your machines — declarative, cross-platform environment management in one Rust CLI.
+template: splash
+hero:
+  tagline: A grimoire for your machines. Declarative, cross-platform environment management in one Rust CLI.
+  actions:
+    - text: Get started
+      link: /architecture/
+      icon: right-arrow
+    - text: View on GitHub
+      link: https://github.com/alkemdev/grim
+      icon: external
+      variant: minimal
+---
+
+import { CardGrid, LinkCard, Code } from '@astrojs/starlight/components';
+
+## One engine, your data
+
+grim reads a *grimoire* — a repository of declarative configuration (a dotfiles repo is one) — and
+casts it onto the current machine: installing packages across every package manager, rendering config
+files from templates, and isolating per-platform install trees. The engine (`grim`) and your data (a
+grimoire) stay separate, so the tool is reusable and your configuration is portable.
+
+<Code
+	code={`grim facts     # probe the machine into typed Facts
+grim stack     # resolve the platform precedence stack
+grim apply     # render templates -> diff -> atomically place files
+grim packages  # every package -> its resolved provider for this machine`}
+	lang="bash"
+	title="what grim does today"
+/>
+
+## The ideas
+
+<CardGrid>
+	<LinkCard
+		title="Platforms"
+		href="/concepts/platforms/"
+		description="Named, precedence-ordered layers matched against machine facts. A dev container is just the top layer."
+	/>
+	<LinkCard
+		title="Apply"
+		href="/concepts/apply/"
+		description="A scoped MiniJinja templating + placement engine: render, diff, atomically write."
+	/>
+	<LinkCard
+		title="Packages"
+		href="/concepts/packages/"
+		description="One canonical name, many providers; the best one resolved for the current platform stack."
+	/>
+	<LinkCard
+		title="Secrets"
+		href="/concepts/secrets/"
+		description="Optional, pluggable providers (1Password, age/sops, plain env). The core works with none."
+	/>
+</CardGrid>
+
+## Why it's built this way
+
+Every load-bearing choice is written down. See the [decision records](/decisions/) — separating the
+engine from the data, owning the file layer, banded platform precedence, and more.

@@ -26,5 +26,8 @@ All notable changes to grim are documented here. The format follows
 - Project foundation: design docs and concept records under `docs/`, decision records under
   `docs/decisions/`, CI (fmt + clippy + tests + doctests), and AI-agent tooling (`AGENTS.md`,
   `CLAUDE.md`, repo skills).
+- Website (`web/`): the [grim.alkem.dev](https://grim.alkem.dev) documentation site (Astro +
+  Starlight), generated from `docs/` via a sync script so there's one source of truth, with a
+  Cloudflare Pages deploy workflow.
 
 [Unreleased]: https://github.com/alkemdev/grim/commits/main

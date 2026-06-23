@@ -52,10 +52,10 @@ diff-demo:
 apply-demo:
     cargo run --bin grim -- apply --grimoire examples/demo --target /tmp/grim-demo
 
-# Build the documentation website into web/book (requires mdbook).
+# Build the documentation website (Astro + Starlight) into web/dist.
 site-build:
-    mdbook build web
+    cd web && npm ci && npm run build
 
 # Serve the documentation website locally with live reload.
 site-serve:
-    mdbook serve web --open
+    cd web && npm run dev
