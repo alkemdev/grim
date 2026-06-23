@@ -4,29 +4,28 @@ The order is chosen so the **highest-pain, highest-leverage** logic (typed platf
 package orchestration) lands first, and the riskier file-engine cutover happens against a core that's
 already proven. Each phase is independently useful and lands as coherent, well-tested commits.
 
-### Phase 0 — Foundation *(in progress)*
+### Phase 0 — Foundation *(done)*
 
 Repo, workspace, design docs (this directory), compiling skeleton. Establishes the vocabulary and the
 locked decisions: engine vs. grimoire split, own-the-file-layer, optional pluggable secrets, sync
 deferred.
 
-### Phase 1 — `grim-core`: facts + platforms
+### Phase 1 — `grim-core`: facts + platforms *(done)*
 
 The conceptual core. `Facts` and its detection; the `Platform` model and precedence resolution (see
-[platforms.md](concepts/platforms.md), pending the open-choice decisions); the typed manifest model;
-`grim facts`. Table-driven tests are the deliverable as much as the code.
+[platforms.md](concepts/platforms.md)); grimoire loading; `grim facts` and `grim stack`. Done with
+table-driven tests.
 
-### Phase 2 — packages
-
-`grim-pkg`: a provider trait with brew / cargo / uv / npm / go implementations; canonical-id
-resolution against the platform stack; `grim sync` and `grim resolve --explain`. Import the existing
-package inventory verbatim into the new manifests.
-
-### Phase 3 — apply
+### Phase 3 — apply *(done)*
 
 `grim-apply`: the MiniJinja render → diff → atomic-write engine; the source→target naming convention;
-`grim apply` and `grim diff`. Import the chezmoi `home/` sources. Optionally stage via shelling to
-chezmoi first, then swap to native.
+`grim apply` and `grim diff` with `--dry-run`. Done. Still to come: symlink sources, managed-file
+state tracking (so removals propagate), and an importer for an existing chezmoi `home/` tree.
+
+### Phase 2 — packages *(next)*
+
+`grim-pkg`: a provider trait with brew / cargo / uv / npm / go implementations; canonical-id
+resolution against the platform stack; `grim sync` and `grim resolve --explain`.
 
 ### Phase 4 — secrets
 

@@ -15,8 +15,10 @@ All notable changes to grim are documented here. The format follows
   `refines` tie-breaking with cycle and unknown-target validation, and `resolve_override` /
   `resolve_merged` value folds.
 - `grim-core`: grimoire loading (`grimoire.toml` → typed model) and stack resolution.
-- `grim`: `grim facts` (probe the machine) and `grim stack` (resolve the platform stack against a
-  grimoire).
+- `grim-apply`: the file-apply engine — the source→target naming convention
+  (`dot_`/`executable_`/`private_`/`.tmpl`), a MiniJinja render context (`facts`, `platforms`,
+  `isolation_id`), and render → diff → atomic-write planning with Unix mode support.
+- `grim`: `grim facts`, `grim stack`, and `grim apply` / `grim diff` (with `--dry-run`).
 - Project foundation: design docs and concept records under `docs/`, decision records under
   `docs/decisions/`, CI (fmt + clippy + tests + doctests), and AI-agent tooling (`AGENTS.md`,
   `CLAUDE.md`, repo skills).

@@ -55,12 +55,14 @@ cargo install --path crates/grim
 ## Quickstart
 
 ```bash
-grim facts                                   # probe this machine into typed Facts
-grim stack --grimoire examples/grimoire.toml # resolve the active platform stack
+grim facts                                # probe this machine into typed Facts
+grim stack --grimoire examples/demo       # resolve the active platform stack
+grim diff  --grimoire examples/demo --target /tmp/grim-demo   # preview the file apply
+grim apply --grimoire examples/demo --target /tmp/grim-demo   # render and place the files
 ```
 
 ```text
-$ grim stack --grimoire examples/grimoire.toml
+$ grim stack --grimoire examples/demo
 active platform stack (highest precedence first):
   1000  devcontainer       Container
    900  workstation        Host

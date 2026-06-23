@@ -1,32 +1,76 @@
 # Apply
 
-`grim apply` renders the grimoire's `files/` tree into `$HOME` (and other targets). It is the
-replacement for `chezmoi apply` — scoped deliberately to *one user's needs* rather than the universe
-of everyone's, which is what keeps it small.
+`grim apply` renders the grimoire's `files/` tree and places it under a target root (default
+`$HOME`). It is grim's replacement for `chezmoi apply` — scoped deliberately to one user's needs,
+which is what keeps it small ([ADR 0002](../decisions/0002-own-the-file-layer.md)).
 
-## Why own this instead of wrapping chezmoi
+## The source tree
 
-chezmoi's templating layer works well; the reason to absorb it is **one tool, one model**. With the
-file engine in-process, there is no `run_onchange_` hook bridge between "chezmoi rendered a file" and
-"grim should now reconcile packages", no second config language, and no second tool to install. The
-file-apply feature set we actually use is a small fraction of chezmoi's, so reimplementing it cleanly
-is tractable.
+A grimoire's `files/` directory mirrors the target tree. Attributes are encoded in path-component
+names and applied per component, so they work for both files and directories:
 
-## The engine
+| source component   | target            | effect                                  |
+| ------------------ | ----------------- | --------------------------------------- |
+| `dot_zshrc`        | `.zshrc`          | leading-dot rename                      |
+| `dot_config/`      | `.config/`        | same, for directories                   |
+| `executable_setup` | `setup` (mode 755)| mark executable                         |
+| `private_dot_ssh/` | `.ssh/` (mode 700)| restrict permissions (file: 600)        |
+| `gitconfig.tmpl`   | `gitconfig`       | render as a template (suffix stripped)  |
 
-- **Templating: [MiniJinja](https://docs.rs/minijinja).** Jinja2-compatible, a single pure-Rust
-  dependency, actively maintained. Templates see a context built from `Facts`, the resolved platform
-  values, and resolved [secrets](secrets.md).
-- **Source naming.** A small, explicit convention maps a source path to a target path, mode, and
-  type (file / template / symlink). The plan is to keep chezmoi's legible `dot_`, `executable_`,
-  `private_`, `.tmpl` ideas where they pull their weight, but defined by `grim`, not inherited.
-- **Apply = render → diff → atomic write.** Render to memory, diff against what's on disk, and only
-  write what changed — to a temp file, then atomic rename. `--dry-run` stops at the diff and prints
-  it. This gives the transactionality and previewability the shell pipeline never had.
+Attributes combine in the order `[executable_|private_] dot_ name [.tmpl]` — e.g.
+`executable_dot_script.tmpl` → `.script`, mode 755, templated. Source entries beginning with a literal
+`.` (like `.git`) are ignored.
 
-## Migration
+## The template context
 
-A one-time importer maps the existing chezmoi `home/` sources (146 `dot_` files, 32 `.tmpl`
-templates, the `.chezmoidata.toml` / `.chezmoitemplates/` partials) into the new `files/` layout. The
-v0 path may even shell out to chezmoi to de-risk the cutover, then swap in the native engine once it
-reaches parity — the [decision](../../README.md) was to own this, but we can stage *how* we get there.
+Templates are [MiniJinja](https://docs.rs/minijinja) (Jinja2-compatible). A template sees:
+
+- `facts` — the detected machine, e.g. `{{ facts.os }}`, `{{ facts.arch }}`, `{{ facts.hostname }}`,
+  `{{ facts.cpu_features }}`.
+- `platforms` — the active platform names, highest precedence first, e.g.
+  `{% if "workstation" in platforms %}…{% endif %}`.
+- `isolation_id` — the per-platform install-tree namespace, e.g. `{{ isolation_id }}`.
+
+```jinja
+# ~/.demo-grimrc, rendered for {{ facts.hostname }} ({{ facts.os }}/{{ facts.arch }})
+{% if "workstation" in platforms -%}
+EDITOR=nvim
+{%- else -%}
+EDITOR=vim
+{%- endif %}
+```
+
+Trailing newlines are preserved (config files should end with one).
+
+## Apply = render → diff → atomic write
+
+For each source entry, grim computes the target path, mode, and content (rendering templates), then
+compares against what's on disk:
+
+- **create** — the target doesn't exist.
+- **update** — it exists but differs (a unified diff is computed for text files).
+- **unchanged** — it already matches; skipped.
+
+Writes go to a temp file in the target directory and are `rename`d into place, so a reader never sees
+a partial file. `--dry-run` stops after the diff and writes nothing.
+
+## Commands
+
+```bash
+grim apply --grimoire <dir> [--target <root>] [--dry-run]
+grim diff  --grimoire <dir> [--target <root>]   # a dry-run apply that shows the diffs
+```
+
+`--grimoire` is the grimoire *directory* (containing `grimoire.toml` and `files/`); `--target`
+defaults to `$HOME`. Try it against the bundled example:
+
+```bash
+grim diff  --grimoire examples/demo --target /tmp/grim-demo
+grim apply --grimoire examples/demo --target /tmp/grim-demo
+```
+
+## Status & what's next
+
+Implemented: the naming convention, the MiniJinja render context, plan/diff/atomic-apply, modes on
+Unix. Not yet: symlink sources, deletion of files grim previously managed (state tracking), and
+sourcing the chezmoi `home/` tree via an importer. See the [roadmap](../roadmap.md).
