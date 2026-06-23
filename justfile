@@ -24,6 +24,10 @@ doc-test:
 lint:
     cargo clippy --all-targets --all-features -- -D warnings
 
+# Supply-chain audit: advisories, licenses, bans, sources (needs cargo-deny).
+deny:
+    cargo deny check
+
 # Format the tree.
 fmt:
     cargo fmt

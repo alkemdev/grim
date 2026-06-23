@@ -277,7 +277,7 @@ fn unquote(s: &str) -> &str {
 }
 
 /// Decide the container environment from a few independent signals. Pure so it can be tested
-/// without a real container; [`detect_container`] wires it to the filesystem and environment.
+/// without a real container; `detect_container` wires it to the filesystem and environment.
 pub fn classify_container(
     dockerenv: bool,
     containerenv: bool,

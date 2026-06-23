@@ -26,7 +26,9 @@ cargo test --doc
 ```
 
 `just check` must pass before you push. This repo uses **no GitHub Actions** — `just install-hooks`
-installs a pre-push git hook that runs the same bar automatically.
+installs a pre-push git hook that runs the same bar (fmt, clippy, tests, doctests, rustdoc)
+automatically. When you change dependencies, also run `just deny` (a `cargo-deny` supply-chain audit:
+advisories, licenses, bans).
 
 ## Architecture in one breath
 

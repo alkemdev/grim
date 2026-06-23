@@ -8,21 +8,22 @@ yanked = "deny"
 [licenses]
 version = 2
 # Permissive licenses only; flag anything copyleft or unusual for review.
+# Exactly the licenses in the current tree. A new dependency with a different license will fail the
+# check on purpose — review it and add it here deliberately. BSD-2/BSD-3/ISC/Zlib are common and
+# safe to add when first needed.
 allow = [
     "MIT",
     "Apache-2.0",
     "Apache-2.0 WITH LLVM-exception",
-    "BSD-2-Clause",
-    "BSD-3-Clause",
-    "ISC",
     "Unicode-3.0",
-    "Zlib",
 ]
 confidence-threshold = 0.9
 
 [bans]
 multiple-versions = "warn"
 wildcards = "deny"
+# Workspace-internal path deps are versionless by design; only flag wildcards on external crates.
+allow-wildcard-paths = true
 
 [sources]
 unknown-registry = "deny"

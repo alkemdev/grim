@@ -6,6 +6,10 @@ rust-version.workspace = true
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
 description = "A grimoire for your machines: declarative, cross-platform environment management."
 
 [[bin]]
@@ -16,4 +20,4 @@ path = "src/main.rs"
 anyhow = "1.0.102"
 clap = { version = "4.6.1", features = ["derive"] }
 grim-apply = { version = "0.0.0", path = "../grim-apply" }
-grim-core = { path = "../grim-core" }
+grim-core = { version = "0.0.0", path = "../grim-core" }

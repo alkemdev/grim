@@ -8,4 +8,5 @@ cargo fmt --check
 cargo clippy --all-targets --all-features -- -D warnings
 cargo nextest run 2>/dev/null || cargo test
 cargo test --doc
+RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --workspace --quiet
 echo "grim: pre-push checks passed ✓"
