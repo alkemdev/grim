@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# grim pre-push quality gate — the local replacement for CI (this repo uses no GitHub Actions).
+# Enable once with:  just install-hooks   (or: git config core.hooksPath .githooks)
+set -euo pipefail
+
+echo "grim: pre-push checks (fmt, clippy, tests)…"
+cargo fmt --check
+cargo clippy --all-targets --all-features -- -D warnings
+cargo nextest run 2>/dev/null || cargo test
+cargo test --doc
+echo "grim: pre-push checks passed ✓"

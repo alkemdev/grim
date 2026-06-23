@@ -43,11 +43,12 @@ cargo clippy --all-targets -- -D warnings
 cargo fmt                  # and `cargo fmt --check` in CI
 ```
 
-A `justfile` wraps these: `just check` runs the whole CI bar locally.
+A `justfile` wraps these: `just check` runs the whole bar. This repo uses **no GitHub Actions** —
+the quality bar is enforced by a local pre-push git hook; enable it once with `just install-hooks`.
 
 > **Caveat for Claude Code in this environment:** the `rtk` wrapper compresses cargo output and has
 > been observed to report "No issues found" while clippy was actually failing. Verify clippy with
-> `rtk proxy cargo clippy --all-targets -- -D warnings` (raw output) or trust CI.
+> `rtk proxy cargo clippy --all-targets -- -D warnings` (raw output).
 
 ## Conventions
 
@@ -79,4 +80,5 @@ A `justfile` wraps these: `just check` runs the whole CI bar locally.
 ## Definition of done
 
 Behavior change → tests updated/added; `just check` clean; docs updated if the change is
-user-visible; a decision record added if it's architectural. CI is the backstop, not the bar.
+user-visible; a decision record added if it's architectural. The pre-push hook is the backstop — run
+`just check` as you go.

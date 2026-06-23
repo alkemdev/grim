@@ -57,8 +57,9 @@ check in `Match::matches`, and update `Match::inferred_band`. Add tests for matc
 ## Verify your work
 
 ```bash
-just check    # fmt + clippy + tests + doctests — the CI bar
+just check    # fmt + clippy + tests + doctests — the full bar
 ```
 
-In Claude Code here, `rtk` can hide clippy failures; verify with
-`rtk proxy cargo clippy --all-targets -- -D warnings` or trust CI.
+This repo uses no GitHub Actions; a pre-push hook (`just install-hooks`) enforces the bar. In Claude
+Code here, `rtk` can hide clippy failures — verify with
+`rtk proxy cargo clippy --all-targets -- -D warnings`.

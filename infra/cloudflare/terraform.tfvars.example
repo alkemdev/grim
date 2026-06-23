@@ -1,0 +1,11 @@
+# Copy to terraform.tfvars and fill in. Find the account id with:
+#   curl -s -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+#     "https://api.cloudflare.com/client/v4/zones?name=alkem.dev" | jq -r '.result[0].account.id'
+account_id = "YOUR_CLOUDFLARE_ACCOUNT_ID"
+
+# Defaults (override only if needed):
+# zone_name           = "alkem.dev"
+# pages_project_name  = "grim"
+# subdomain           = "grim"
+# pages_custom_domain = "grim.alkem.dev"
+# production_branch   = "main"

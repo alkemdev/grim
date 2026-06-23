@@ -16,7 +16,8 @@ cargo install just --locked            # task runner (or run the cargo commands 
 ## The loop
 
 ```bash
-just check        # the full local CI bar: fmt, clippy, tests, doctests
+just install-hooks   # one-time: enable the pre-push quality gate
+just check           # the full bar: fmt, clippy, tests, doctests
 # or individually:
 cargo fmt
 cargo clippy --all-targets -- -D warnings
@@ -24,7 +25,8 @@ cargo nextest run
 cargo test --doc
 ```
 
-`just check` must pass before you push. CI runs the same bar on every push and PR.
+`just check` must pass before you push. This repo uses **no GitHub Actions** — `just install-hooks`
+installs a pre-push git hook that runs the same bar automatically.
 
 ## Architecture in one breath
 

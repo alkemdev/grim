@@ -24,10 +24,10 @@ All notable changes to grim are documented here. The format follows
 - `grim`: `grim facts`, `grim stack`, `grim apply` / `grim diff` (with `--dry-run`), and
   `grim packages` / `grim resolve` (explainable package resolution).
 - Project foundation: design docs and concept records under `docs/`, decision records under
-  `docs/decisions/`, CI (fmt + clippy + tests + doctests), and AI-agent tooling (`AGENTS.md`,
-  `CLAUDE.md`, repo skills).
+  `docs/decisions/`, a local pre-push quality gate (fmt + clippy + tests + doctests; no GitHub
+  Actions), and AI-agent tooling (`AGENTS.md`, `CLAUDE.md`, repo skills).
 - Website (`web/`): the [grim.alkem.dev](https://grim.alkem.dev) documentation site (Astro +
-  Starlight), generated from `docs/` via a sync script so there's one source of truth, with a
-  Cloudflare Pages deploy workflow.
+  Starlight), generated from `docs/` via a sync script so there's one source of truth. Hosted on
+  Cloudflare Pages, provisioned with OpenTofu (`infra/cloudflare/`) and deployed with `wrangler`.
 
 [Unreleased]: https://github.com/alkemdev/grim/commits/main
