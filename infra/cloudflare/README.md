@@ -3,12 +3,10 @@
 Manages the hosting for [grim.alkem.dev](https://grim.alkem.dev) declaratively — **no GitHub
 Actions**. It creates:
 
-- a Cloudflare **Pages** project `grim` (Direct Upload type),
+- a Cloudflare **Pages** project `grim`, git-integrated with `alkemdev/grim` (Cloudflare builds
+  `web/` and deploys on every push to `main`),
 - the custom domain `grim.alkem.dev` bound to that project,
 - a proxied `CNAME` `grim → <project>.pages.dev` in the `alkem.dev` zone.
-
-The site *content* is uploaded separately with `wrangler` (`just site-deploy`); this directory only
-manages the project, domain, and DNS.
 
 ## Prerequisites
 
@@ -27,17 +25,15 @@ tofu plan
 tofu apply        # or, from the repo root: just infra-apply
 ```
 
-State is local (`terraform.tfstate`, git-ignored). After the project exists, deploy the site:
+State is local (`terraform.tfstate`, git-ignored). Once the project exists, **deploys are
+automatic** — push to `main` and Cloudflare builds `web/` and publishes. There's no manual deploy
+step and no GitHub Actions.
 
-```bash
-just site-deploy  # from the repo root
-```
+## Notes
 
-## Why Direct Upload (and not git integration)
-
-`alkemdev/grim` is private. Cloudflare's git integration (where Cloudflare builds the site itself on
-push) needs the Cloudflare GitHub App connected to the repo — a one-time dashboard step. Until then,
-Direct Upload keeps everything scriptable and under our control. To switch later, connect the app and
-add a `source { type = "github" }` + `build_config` block to `cloudflare_pages_project` (see the
-mdBook-era config in the old dotfiles repo for the shape). Either way, **no GitHub Actions** are
-involved.
+- The project is connected to GitHub via the Cloudflare GitHub App on the `alkemdev` org (shared with
+  the account's other Pages projects). Build settings live in the `build_config` block of
+  `cloudflare_pages_project` (root `web/`, `npm ci && npm run build`, output `dist`).
+- Replacing the project (e.g. changing its git source) requires detaching the custom domain first;
+  the cleanest path is `tofu destroy` then `tofu apply`, since Terraform orders the domain/record
+  teardown before the project.

@@ -39,9 +39,21 @@ variable "pages_custom_domain" {
 }
 
 variable "production_branch" {
-  description = "Production branch name (metadata for the project)."
+  description = "Production branch Cloudflare builds and serves."
   type        = string
   default     = "main"
+}
+
+variable "github_owner" {
+  description = "GitHub org/user that owns the repo Cloudflare builds from."
+  type        = string
+  default     = "alkemdev"
+}
+
+variable "github_repo" {
+  description = "GitHub repo name."
+  type        = string
+  default     = "grim"
 }
 
 # Reads the API token from CLOUDFLARE_API_TOKEN in the environment.
@@ -51,13 +63,29 @@ data "cloudflare_zone" "apex" {
   name = var.zone_name
 }
 
-# A Direct-Upload Pages project: assets are pushed with `wrangler pages deploy` (see README and the
-# `site-deploy` just recipe). No git source and no build_config, so Cloudflare never tries to build
-# from the repo — deploys are explicit, and there is no GitHub Actions in the loop.
+# Git-integrated Pages project: Cloudflare itself builds the Astro site from the repo and deploys on
+# every push to the production branch. No GitHub Actions are involved — Cloudflare does the building.
 resource "cloudflare_pages_project" "site" {
   account_id        = var.account_id
   name              = var.pages_project_name
   production_branch = var.production_branch
+
+  source {
+    type = "github"
+    config {
+      owner             = var.github_owner
+      repo_name         = var.github_repo
+      production_branch = var.production_branch
+    }
+  }
+
+  build_config {
+    # The site lives in web/ (Astro + Starlight). `npm run build` runs the docs-sync, then astro
+    # build, emitting web/dist.
+    root_dir        = "web"
+    build_command   = "npm ci && npm run build"
+    destination_dir = "dist"
+  }
 }
 
 resource "cloudflare_pages_domain" "site" {

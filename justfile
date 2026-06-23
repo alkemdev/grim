@@ -60,12 +60,8 @@ site-build:
 site-serve:
     cd web && npm run dev
 
-# Build and deploy the website to Cloudflare Pages (Direct Upload via wrangler).
-# Requires CLOUDFLARE_API_TOKEN (and CLOUDFLARE_ACCOUNT_ID if the token spans accounts).
-site-deploy: site-build
-    cd web && npx --yes wrangler@latest pages deploy dist --project-name grim --branch main --commit-dirty=true
-
-# Create/update the Cloudflare Pages project, custom domain, and DNS (OpenTofu).
+# Deploys are automatic: Cloudflare Pages builds web/ and publishes on every push to main.
+# This manages the project/domain/DNS itself (OpenTofu).
 infra-apply:
     cd infra/cloudflare && tofu init && tofu apply
 

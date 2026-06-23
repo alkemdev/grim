@@ -23,20 +23,13 @@ npm run preview   # preview the production build
 
 ## Deploy (Cloudflare Pages — no GitHub Actions)
 
-The Pages project, custom domain (`grim.alkem.dev`), and DNS are managed by OpenTofu in
-[`../infra/cloudflare/`](../infra/cloudflare/) — a **Direct Upload** project, so Cloudflare never
-builds from the repo. Deploys are explicit:
+Deploys are **automatic**: the Cloudflare Pages project is git-integrated, so Cloudflare builds `web/`
+(`npm ci && npm run build`) and publishes to `grim.alkem.dev` on every push to `main`. No GitHub
+Actions are involved — Cloudflare does the building.
 
-```bash
-just site-deploy     # from the repo root: builds, then `wrangler pages deploy`
-```
-
-`wrangler` reads `CLOUDFLARE_API_TOKEN` from the environment (set `CLOUDFLARE_ACCOUNT_ID` too if your
-token spans multiple accounts). To provision or change the project/domain/DNS, run `just infra-apply`.
-
-> Want auto-deploy on push instead? Connect the Cloudflare GitHub App to the repo and switch the
-> OpenTofu `cloudflare_pages_project` to a `source { type = "github" }` build — still no GitHub
-> Actions, since Cloudflare does the building.
+The project, custom domain, and DNS are managed declaratively by OpenTofu in
+[`../infra/cloudflare/`](../infra/cloudflare/); run `just infra-apply` to change them. The build uses
+Node `web/.nvmrc`.
 
 ## Astro version note
 

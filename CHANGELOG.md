@@ -28,6 +28,7 @@ All notable changes to grim are documented here. The format follows
   Actions), and AI-agent tooling (`AGENTS.md`, `CLAUDE.md`, repo skills).
 - Website (`web/`): the [grim.alkem.dev](https://grim.alkem.dev) documentation site (Astro +
   Starlight), generated from `docs/` via a sync script so there's one source of truth. Hosted on
-  Cloudflare Pages, provisioned with OpenTofu (`infra/cloudflare/`) and deployed with `wrangler`.
+  git-integrated Cloudflare Pages (provisioned with OpenTofu in `infra/cloudflare/`) — Cloudflare
+  builds and deploys on every push; no GitHub Actions.
 
 [Unreleased]: https://github.com/alkemdev/grim/commits/main
