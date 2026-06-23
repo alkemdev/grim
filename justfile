@@ -42,7 +42,15 @@ run *ARGS:
 
 # Resolve the example grimoire's platform stack for this machine.
 stack:
-    cargo run --bin grim -- stack --grimoire examples/grimoire.toml
+    cargo run --bin grim -- stack --grimoire examples/demo
+
+# Preview the example grimoire's file apply into /tmp/grim-demo.
+diff-demo:
+    cargo run --bin grim -- diff --grimoire examples/demo --target /tmp/grim-demo
+
+# Apply the example grimoire's files into /tmp/grim-demo.
+apply-demo:
+    cargo run --bin grim -- apply --grimoire examples/demo --target /tmp/grim-demo
 
 # Build the documentation website into web/book (requires mdbook).
 site-build:

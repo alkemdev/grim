@@ -1,0 +1,18 @@
+[package]
+name = "grim-apply"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "grim's file-templating and placement engine: render, diff, atomically write."
+
+[dependencies]
+grim-core = { path = "../grim-core" }
+minijinja = "2.21.0"
+similar = "3.1.1"
+thiserror = "2.0.18"
+
+[dev-dependencies]
+tempfile = "3.27.0"

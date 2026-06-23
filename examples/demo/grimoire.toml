@@ -1,12 +1,14 @@
-# An example grimoire. Try it with:
+# An example grimoire. A grimoire is a directory containing this `grimoire.toml` and a `files/` tree.
 #
-#     grim stack --grimoire examples/grimoire.toml
+#     grim stack --grimoire examples/demo     # resolve the platform stack for this machine
+#     grim diff  --grimoire examples/demo --target /tmp/grim-demo   # preview the file apply
+#     grim apply --grimoire examples/demo --target /tmp/grim-demo   # place the files
 #
 # Precedence is inferred from which facts each platform constrains — no numbers to manage in the
 # common case. The bands, lowest to highest: os < arch < distro < hardware < host < container.
 
 [grimoire]
-name = "example"
+name = "demo"
 # extends = ["vendor/dotfiles"]   # grimoire composition (home <- work) lands in a later phase
 
 [platform.macos]

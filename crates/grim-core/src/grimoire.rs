@@ -59,6 +59,11 @@ impl Grimoire {
         })
     }
 
+    /// Load a grimoire from a directory containing a `grimoire.toml`.
+    pub fn load_dir(dir: &Path) -> Result<Self, LoadError> {
+        Self::load(&dir.join("grimoire.toml"))
+    }
+
     /// Load a grimoire from a `grimoire.toml` file on disk.
     pub fn load(path: &Path) -> Result<Self, LoadError> {
         let text = std::fs::read_to_string(path).map_err(|source| LoadError::Io {
