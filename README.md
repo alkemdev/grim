@@ -1,60 +1,94 @@
+<div align="center">
+
 # grim
 
-**A grimoire for your machines.** Declarative, cross-platform environment management in Rust.
+**A grimoire for your machines.**
+Declarative, cross-platform environment management in a single Rust CLI.
 
-`grim` reads a *grimoire* — a repository of declarative configuration — and *casts* it onto
-the current machine: installing packages across every package manager, rendering config files
-from templates, wiring up secrets, and isolating per-platform install trees so a single shared
-`$HOME` can serve a fleet of heterogeneous machines.
+[Documentation](https://grim.alkem.dev) · [Concepts](docs/README.md) · [Roadmap](docs/roadmap.md) · [Decisions](docs/decisions/)
+
+</div>
+
+---
+
+`grim` reads a *grimoire* — a repository of declarative configuration — and *casts* it onto the
+current machine: installing packages across every package manager, rendering config files from
+templates, wiring up secrets, and isolating per-platform install trees so one shared `$HOME` can
+serve a fleet of heterogeneous machines.
 
 The engine and the configuration are deliberately separate:
 
-| Thing       | What it is                              | Example                                  |
-| ----------- | --------------------------------------- | ---------------------------------------- |
-| **`grim`**  | the engine (this repo) — a single CLI   | `grim apply`, `grim sync`, `grim doctor` |
-| a *grimoire* | your data — a repo `grim` reads          | [`dotfiles`](https://github.com/cadebrown/dotfiles) |
+| Thing        | What it is                            | Example                                   |
+| ------------ | ------------------------------------- | ----------------------------------------- |
+| **`grim`**   | the engine (this repo) — a single CLI | `grim apply`, `grim sync`, `grim doctor`  |
+| a *grimoire* | your data — a repo `grim` reads       | a dotfiles repo                           |
 
 A dotfiles repo is just a grimoire. Your work machine's private repo is *another* grimoire that
-**extends** the public one (as a submodule) and overrides it. Same engine, layered data.
+**extends** the public one and overrides it. Same engine, layered data.
 
 ## Why
 
-The system this replaces had a clean declarative *file* layer (chezmoi) sitting on top of ~6,700
-lines of untyped, untested shell that did all the real work: package orchestration, platform
-detection (duplicated four times), config merging (reimplemented four times), and secret loading
-(plaintext env files globbed into every shell). It worked, but it drifted by hand and there was no
-dry-run, no transactionality, and no tests on the riskiest scripts.
+A typical dotfiles setup is a clean declarative file layer sitting on a pile of untyped, untested
+shell that does the real work — package orchestration, platform detection, config merging, secret
+loading. It works until it drifts. `grim` moves that logic into one typed, tested Rust binary built
+on a few clean abstractions:
 
-`grim` moves that logic into one typed, tested Rust binary built on a small set of clean
-abstractions:
-
-- **Facts** — the machine, probed once into a typed struct (OS, arch, CPU features, distro, libc,
-  GPU, hostname, container, …).
+- **Facts** — the machine, probed once into a typed struct.
 - **Platforms** — named, precedence-ordered layers matched against facts. A dev container is just a
-  high-precedence platform. See [Platforms](docs/concepts/platforms.md).
-- **Packages** — a canonical id resolved to the best provider (brew / cargo / uv / npm / go / …) for
-  the current platform stack. One manifest, every package manager.
-- **Apply** — a scoped templating + file-placement engine (MiniJinja) that retires chezmoi.
+  high-precedence platform. ([concept](docs/concepts/platforms.md))
+- **Packages** — one canonical id resolved to the best provider (brew / cargo / uv / npm / go / …) for
+  the current platform stack. ([concept](docs/concepts/packages.md))
+- **Apply** — a scoped templating + file-placement engine. ([concept](docs/concepts/apply.md))
 - **Secrets** — *optional*, pluggable providers (1Password, age/sops, plain env). Core works with
-  none configured.
+  none. ([concept](docs/concepts/secrets.md))
+
+## Install
+
+> grim is green-field and pre-`0.1`; install from source.
+
+```bash
+git clone https://github.com/alkemdev/grim
+cd grim
+cargo install --path crates/grim
+```
+
+## Quickstart
+
+```bash
+grim facts                                   # probe this machine into typed Facts
+grim stack --grimoire examples/grimoire.toml # resolve the active platform stack
+```
+
+```text
+$ grim stack --grimoire examples/grimoire.toml
+active platform stack (highest precedence first):
+  1000  devcontainer       Container
+   900  workstation        Host
+   400  cuda               Hardware
+   100  linux              Os
+```
 
 ## Status
 
-Green-field and early. The architecture and concepts are being designed in the open under
-[`docs/`](docs/); the core engine is taking shape under [`crates/`](crates/). Nothing here is
-stable yet.
+Early. The detect → load → resolve core is built and tested; the apply, packages, and secrets layers
+are landing per the [roadmap](docs/roadmap.md). The design is documented in the open under
+[`docs/`](docs/) and recorded in [decision records](docs/decisions/).
 
 ## Layout
 
 ```
-grim/
-├── crates/
-│   ├── grim-core/   pure logic: facts, platforms, precedence, manifest model
-│   └── grim/        the CLI binary
-├── docs/            architecture + concept docs (source for the docs site)
-└── Cargo.toml       workspace
+crates/
+  grim-core/   pure logic: facts, platforms, precedence, manifests, resolution
+  grim/        the CLI binary
+docs/          architecture, concepts, guides, decisions (source for grim.alkem.dev)
+examples/      example grimoires
 ```
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) (and [AGENTS.md](AGENTS.md) if you're a coding agent). The
+short version: `grim-core` stays pure, `just check` stays green, and decisions get an ADR.
 
 ## License
 
-MIT. See [LICENSE-MIT](LICENSE-MIT).
+MIT — see [LICENSE-MIT](LICENSE-MIT).
