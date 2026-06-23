@@ -1,56 +1,57 @@
 # Packages
 
-One declaration, every package manager. A package has a **canonical id** and an ordered list of
-**provider rows**; resolution picks the best provider for the current [platform stack](platforms.md).
+One declaration, every package manager. A package has a **canonical name** and an ordered list of
+**provider** rows; resolution picks the best provider for the current
+[platform stack](platforms.md).
 
 ## The model
 
 ```toml
 [package.ripgrep]
-providers = [
-    { brew  = "ripgrep" },
-    { cargo = "ripgrep" },              # binstall-able; fallback when no brew
-]
+providers = [{ brew = "ripgrep" }, { cargo = "ripgrep" }]
 
 [package.docker]
 providers = [
     { brew = "docker", platform = "macos" },
     { apt  = "docker.io", platform = "linux" },
 ]
-
-[package.cuda-toolkit]
-providers = [
-    { apt = "cuda-toolkit-12", platform = "cuda" },   # only where the `cuda` platform matches
-]
 ```
 
-To resolve `ripgrep` on a given machine, walk its provider rows and pick the first whose `platform`
-predicate is satisfied by the active stack (and whose manager is available). The dev container, being
-the highest-precedence platform, naturally wins when present.
+A provider row is `{ <manager> = "<id>" }` with an optional `platform = "<name>"` gate. The
+supported managers are `brew`, `cargo`, `uv`, `npm`, `go`, `pip`, `apt`, `dnf`, `pacman` — the set is
+closed, so a typo'd manager name is a hard error, and a row may name exactly one manager.
+
+## Resolution
+
+To resolve a package for a machine, grim walks its provider rows **in declared order** and keeps each
+whose `platform` gate is satisfied by the [active stack](platforms.md) (an ungated row always
+applies). The first surviving row is the **preferred** provider; the rest are fallbacks. This is
+pure — whether a manager is actually installed is a separate, runtime concern (see *Status* below).
 
 This subsumes the three incompatible conventions the old `packages/` directory used (Ruby
-`if OS.mac?` in the Brewfile, `# linux-only` text markers, and no markers at all in `cargo.txt`)
-under one typed, enforceable scheme. "One tool, one owning layer" stops being a prose comment and
-becomes a validation the engine can run.
+`if OS.mac?`, `# linux-only` text markers, and unmarked lists) under one typed, enforceable scheme.
 
-## Canonical ids across managers
+## Explaining a resolution
 
-The hard part is that managers name the same software differently (`ripgrep` vs `rg` vs
-`ripgrep-bin`). The plan: a **vendored name map** (seeded from a Repology snapshot, which is
-rate-limited and not authoritative, so it's a build-time snapshot) plus hand-curated overrides. The
-grimoire can always state the exact per-manager id explicitly, as above; the map is only a
-convenience for the common case.
+Resolution is meant to be legible — the old system's biggest debugging cost was opacity.
 
-## What carries over
+```text
+$ grim resolve docker --grimoire examples/demo
+docker:
+  + brew = docker                   [preferred]
+  - apt = docker.io                 (platform `linux` is not active)
+```
 
-The migration target is the existing inventory, verbatim: ~110 Brewfile entries (formulae + macOS
-casks + taps), 31 cargo crates (binstall-able only), 7 uv-tool CLIs, 7 npm globals (with version
-pins), 5 go modules, plus the MCP-server / Claude-plugin / agent-skill / editor-extension lists.
-Importing these into the new manifest format is the first real package-layer task; see the
-[roadmap](../roadmap.md).
+```bash
+grim packages --grimoire <dir>          # every package and its resolved provider for this machine
+grim resolve  <name> --grimoire <dir>   # explain one package's resolution
+```
 
-## Resolution must be explainable
+## Status & what's next
 
-`grim resolve ripgrep --explain` should print exactly which provider was chosen and why (which
-platform matched, which managers were available, what was shadowed). The old system's biggest
-debugging cost was opacity; explainability is a first-class feature here.
+Implemented: the typed manifest model, the provider shorthand and platform gates, eligibility
+resolution, and `grim packages` / `grim resolve`. **Next** (`grim-pkg`): the `Manager` trait with
+real backends, manager-availability checks (so resolution falls through to an installed fallback),
+and `grim sync` to reconcile installed packages to the manifest — see the
+[roadmap](../roadmap.md). A vendored canonical-id name map across managers is deferred until it earns
+its place; today you state the per-manager id explicitly, which is unambiguous.

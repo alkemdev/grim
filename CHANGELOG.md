@@ -18,7 +18,11 @@ All notable changes to grim are documented here. The format follows
 - `grim-apply`: the file-apply engine — the source→target naming convention
   (`dot_`/`executable_`/`private_`/`.tmpl`), a MiniJinja render context (`facts`, `platforms`,
   `isolation_id`), and render → diff → atomic-write planning with Unix mode support.
-- `grim`: `grim facts`, `grim stack`, and `grim apply` / `grim diff` (with `--dry-run`).
+- `grim-core`: the package model — one canonical name, ordered provider rows (`{ brew = "rg" }`
+  shorthand with optional `platform` gate, closed manager set), and pure resolution against the
+  active stack (`resolve_package` / `preferred_provider`).
+- `grim`: `grim facts`, `grim stack`, `grim apply` / `grim diff` (with `--dry-run`), and
+  `grim packages` / `grim resolve` (explainable package resolution).
 - Project foundation: design docs and concept records under `docs/`, decision records under
   `docs/decisions/`, CI (fmt + clippy + tests + doctests), and AI-agent tooling (`AGENTS.md`,
   `CLAUDE.md`, repo skills).

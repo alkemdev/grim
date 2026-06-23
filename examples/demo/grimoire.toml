@@ -31,3 +31,14 @@ match = { hostname = "x1" }
 # Container band: a dev container tops the stack.
 [platform.devcontainer]
 match = { container = {} }
+
+# Packages — one canonical id, ordered providers. The first provider whose platform gate is
+# satisfied is preferred (whether the manager is installed is checked later, at `grim sync`).
+[package.ripgrep]
+providers = [{ brew = "ripgrep" }, { cargo = "ripgrep" }]
+
+[package.docker]
+providers = [
+    { brew = "docker", platform = "macos" },
+    { apt = "docker.io", platform = "linux" },
+]

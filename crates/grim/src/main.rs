@@ -10,7 +10,7 @@ use std::path::{Path, PathBuf};
 use anyhow::Context as _;
 use clap::{Parser, Subcommand};
 use grim_apply::{Change, Plan, RenderContext, execute, plan};
-use grim_core::{Facts, Grimoire};
+use grim_core::{Facts, Grimoire, preferred_provider, resolve_package};
 
 #[derive(Parser)]
 #[command(name = "grim", version, about = "A grimoire for your machines.")]
@@ -50,6 +50,20 @@ enum Command {
         #[arg(long)]
         target: Option<PathBuf>,
     },
+    /// List the grimoire's packages and the provider resolved for this machine.
+    Packages {
+        /// Path to the grimoire directory.
+        #[arg(long, default_value = ".")]
+        grimoire: PathBuf,
+    },
+    /// Explain how a package resolves to a provider on this machine.
+    Resolve {
+        /// The package name to explain.
+        name: String,
+        /// Path to the grimoire directory.
+        #[arg(long, default_value = ".")]
+        grimoire: PathBuf,
+    },
 }
 
 fn main() -> anyhow::Result<()> {
@@ -65,6 +79,8 @@ fn main() -> anyhow::Result<()> {
             dry_run,
         }) => cmd_apply(&grimoire, target, dry_run)?,
         Some(Command::Diff { grimoire, target }) => cmd_diff(&grimoire, target)?,
+        Some(Command::Packages { grimoire }) => cmd_packages(&grimoire)?,
+        Some(Command::Resolve { name, grimoire }) => cmd_resolve(&grimoire, &name)?,
         None => {
             println!("{} {}", grim_core::NAME, env!("CARGO_PKG_VERSION"));
             println!("run `grim --help` for commands");
@@ -116,6 +132,60 @@ fn cmd_diff(grimoire_dir: &Path, target: Option<PathBuf>) -> anyhow::Result<()> 
     let (created, updated, _) = p.counts();
     if created + updated == 0 {
         println!("no changes");
+    }
+    Ok(())
+}
+
+fn cmd_packages(grimoire_dir: &Path) -> anyhow::Result<()> {
+    let grimoire = Grimoire::load_dir(grimoire_dir)?;
+    let facts = Facts::detect();
+    let stack = grimoire.resolve(&facts)?;
+    if grimoire.packages.is_empty() {
+        println!("no packages declared");
+        return Ok(());
+    }
+    for package in &grimoire.packages {
+        match preferred_provider(package, &stack) {
+            Some(provider) => {
+                println!(
+                    "  {:<22} {} via {}",
+                    package.name, provider.id, provider.manager
+                )
+            }
+            None => println!(
+                "  {:<22} (no eligible provider for this machine)",
+                package.name
+            ),
+        }
+    }
+    Ok(())
+}
+
+fn cmd_resolve(grimoire_dir: &Path, name: &str) -> anyhow::Result<()> {
+    let grimoire = Grimoire::load_dir(grimoire_dir)?;
+    let facts = Facts::detect();
+    let stack = grimoire.resolve(&facts)?;
+    let package = grimoire
+        .packages
+        .iter()
+        .find(|p| p.name == name)
+        .with_context(|| format!("no package `{name}` in this grimoire"))?;
+
+    println!("{name}:");
+    let mut preferred = true;
+    for choice in resolve_package(package, &stack) {
+        let p = choice.provider;
+        if choice.eligible {
+            let tag = if preferred { "preferred" } else { "fallback" };
+            println!("  + {} = {:<24} [{tag}]", p.manager, p.id);
+            preferred = false;
+        } else {
+            let reason = choice.reason.as_deref().unwrap_or("not eligible");
+            println!("  - {} = {:<24} ({reason})", p.manager, p.id);
+        }
+    }
+    if preferred {
+        println!("  (no eligible provider for this machine)");
     }
     Ok(())
 }

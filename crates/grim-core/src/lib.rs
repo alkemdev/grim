@@ -14,12 +14,16 @@
 pub mod error;
 pub mod facts;
 pub mod grimoire;
+pub mod package;
 pub mod platform;
 pub mod resolve;
 
 pub use error::{LoadError, ResolveError};
 pub use facts::{Arch, Container, ContainerKind, Distro, Facts, Gpu, GpuVendor, Libc, Os};
 pub use grimoire::{Grimoire, Meta};
+pub use package::{
+    Manager, Package, PackageDef, Provider, ProviderChoice, preferred_provider, resolve_package,
+};
 pub use platform::{
     Band, ContainerMatch, DistroMatch, FeatureMatch, GpuMatch, Match, Platform, PlatformDef,
 };

@@ -28,6 +28,11 @@ impl<'p> ActiveStack<'p> {
         self.platforms.iter().map(|p| p.name.as_str()).collect()
     }
 
+    /// Whether a platform of the given name is in the active stack.
+    pub fn contains(&self, name: &str) -> bool {
+        self.platforms.iter().any(|p| p.name == name)
+    }
+
     /// Resolve a scalar value keyed by platform name: the contribution from the highest-precedence
     /// platform present in `map` wins; the rest are shadowed.
     pub fn resolve_override<'a, T>(&self, map: &'a BTreeMap<String, T>) -> Option<&'a T> {

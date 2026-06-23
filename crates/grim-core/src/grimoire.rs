@@ -12,17 +12,20 @@ use serde::Deserialize;
 
 use crate::error::{LoadError, ResolveError};
 use crate::facts::Facts;
+use crate::package::{Package, PackageDef};
 use crate::platform::{Platform, PlatformDef};
 use crate::resolve::{ActiveStack, resolve_stack};
 
 /// The on-disk shape of a `grimoire.toml`. Top-level unknown sections are tolerated so later phases
-/// (e.g. `[package.*]`) can be added without breaking older engines.
+/// can add sections without breaking older engines.
 #[derive(Debug, Default, Deserialize)]
 struct GrimoireFile {
     #[serde(default)]
     grimoire: Meta,
     #[serde(default)]
     platform: BTreeMap<String, PlatformDef>,
+    #[serde(default)]
+    package: BTreeMap<String, PackageDef>,
 }
 
 /// Identity and composition metadata for a grimoire.
@@ -35,13 +38,15 @@ pub struct Meta {
     pub extends: Vec<String>,
 }
 
-/// A loaded grimoire: its metadata and the platforms it declares.
+/// A loaded grimoire: its metadata, the platforms it declares, and the packages it owns.
 #[derive(Debug)]
 pub struct Grimoire {
     /// Identity and composition metadata.
     pub meta: Meta,
     /// The declared platforms, in no particular order (precedence comes from resolution).
     pub platforms: Vec<Platform>,
+    /// The declared packages, sorted by name.
+    pub packages: Vec<Package>,
 }
 
 impl Grimoire {
@@ -53,9 +58,15 @@ impl Grimoire {
             .into_iter()
             .map(|(name, def)| Platform::from_def(name, def))
             .collect();
+        let packages = file
+            .package
+            .into_iter()
+            .map(|(name, def)| Package::from_def(name, def))
+            .collect();
         Ok(Grimoire {
             meta: file.grimoire,
             platforms,
+            packages,
         })
     }
 
