@@ -1,31 +1,17 @@
 # CLAUDE.md — grim
 
-`grim` is a single Rust CLI for declarative, cross-platform environment management. It reads a
-*grimoire* (a config repo — a dotfiles repo is one) and casts it onto a machine. **Read
-[`docs/`](docs/) first** — it is the canonical design record, written as decisions are made.
+**Read [`AGENTS.md`](AGENTS.md) first** — it is the canonical guide for working in this repo
+(architecture, the "keep `grim-core` pure" rule, build/test/lint, conventions, where things go). This
+file holds only Claude Code–specific notes.
 
-## Locked decisions
+## Claude-specific notes
 
-- **Engine vs. data split.** `grim` (this repo) is the engine; a *grimoire* (e.g. the `dotfiles`
-  repo) is the data. Keep them separate; don't fold grimoire-specific logic into the engine.
-- **Own the file layer.** `grim` retires chezmoi and embeds its own MiniJinja apply engine. Don't add
-  a chezmoi runtime dependency (shelling to it as a *staging* step during migration is allowed).
-- **Secrets are optional + pluggable.** Core must work with no secret provider. Never make a provider
-  a hard dependency or let it block `apply`.
-- **Sync/backup is deferred** (Phase 7). Leave the seam; don't build it yet.
-
-## Architecture
-
-Pure logic in `grim-core` (facts, platforms, precedence, manifests) — testable with no I/O. The
-crates that touch the world (`grim-pkg`, `grim-apply`, `grim-secrets`) stay thin. See
-[architecture.md](docs/architecture.md). The platform precedence model
-([platforms.md](docs/concepts/platforms.md)) is the conceptual core and has open design choices still
-being settled — check there before writing the platform types.
-
-## Conventions
-
-- Edition 2024; toolchain pinned in `rust-toolchain.toml`. `cargo fmt` + `cargo clippy` clean.
-- Errors: `thiserror` in libraries, `anyhow` at the CLI boundary. No `unwrap()` outside tests.
-- Tests live with the logic in `grim-core`; prefer table-driven tests over machine-dependent fixtures.
-  Use `cargo nextest run` (doctests via `cargo test --doc`).
-- Commits: conventional-commits, imperative, explain the *why* and anything surprising.
+- **Verify clippy raw.** The `rtk` cargo wrapper in this environment compresses output and has
+  reported "No issues found" while clippy was failing. Run
+  `rtk proxy cargo clippy --all-targets -- -D warnings` to see real output, or rely on CI.
+- **Skills.** Repo-local skills for grim development live under `.claude/skills/` — e.g.
+  `grim-architecture` (the mental model) and `add-a-provider` (the package-provider checklist). Use
+  them when the task matches.
+- **Design docs are canonical.** `docs/` is the source of truth and the website source. Update it
+  alongside behavior changes; add a `docs/decisions/` ADR for anything architectural.
+- **The roadmap** (`docs/roadmap.md`) is the living task list — keep it current as phases land.
